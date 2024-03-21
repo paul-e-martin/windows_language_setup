@@ -22,11 +22,7 @@ Param (
 
     [Parameter(Mandatory = $false, HelpMessage = 'Additional Language')]
     [ValidateNotNullOrEmpty()] 
-    [string] $additionalLanguages,
-
-    [Parameter(Mandatory = $true)]
-    [ValidateNotNullorEmpty()] 
-    [string] $sasToken
+    [string] $additionalLanguages
 )
 
 begin {
@@ -116,7 +112,7 @@ begin {
     }
 
     $logPath = "$env:SYSTEMROOT\TEMP\Deployment_" + (Get-Date -Format 'yyyy-MM-dd')
-    $sasToken = $sasToken.Replace('..', '&')
+
     [array]$languages = $primaryLanguage, $secondaryLanguage
     if (!([string]::IsNullOrEmpty($additionalLanguages))) {
         $languages += $additionalLanguages.Split(';')
@@ -133,7 +129,7 @@ process {
         # Download Language Pack
         try {
             Write-Log -Object "LanguageSetup_Part1" -Message "$($lang): Downloading Language Pack" -Severity Information -LogPath $logPath
-            Start-BitsTransfer -Source $uri$sasToken -Destination "$env:SYSTEMROOT\Temp\$(Split-Path $uri -Leaf)"
+            Start-BitsTransfer -Source $uri -Destination "$env:SYSTEMROOT\Temp\$(Split-Path $uri -Leaf)"
             Write-Log -Object "LanguageSetup_Part1" -Message "$($lang): Downloaded Language Pack" -Severity Information -LogPath $logPath
             $languagePack = Get-Item -Path "$env:SYSTEMROOT\Temp\$(Split-Path $uri -Leaf)"
             Unblock-File -Path $languagePack.FullName -ErrorAction SilentlyContinue
@@ -157,7 +153,7 @@ process {
 
             try {
                 Write-Log -Object "LanguageSetup_Part1" -Message "$($lang): Downloading License File" -Severity Information -LogPath $logPath
-                Start-BitsTransfer -Source $uri$sasToken -Destination "$env:SYSTEMROOT\Temp\$(Split-Path $url -Leaf)"
+                Start-BitsTransfer -Source $uri -Destination "$env:SYSTEMROOT\Temp\$(Split-Path $url -Leaf)"
                 $licenseFile = Get-Item "$env:SYSTEMROOT\Temp\$(Split-Path $url -Leaf)"
                 Unblock-File -Path $licenseFile.FullName -ErrorAction SilentlyContinue
                 Write-Log -Object "LanguageSetup_Part1" -Message "$($lang): Downloaded License File" -Severity Information -LogPath $logPath
